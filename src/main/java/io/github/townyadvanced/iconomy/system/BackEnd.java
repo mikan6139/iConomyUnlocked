@@ -3,13 +3,16 @@ package io.github.townyadvanced.iconomy.system;
 import java.io.File;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.h2.jdbcx.JdbcConnectionPool;
+
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
 
 import io.github.townyadvanced.iconomy.iConomyUnlocked;
 import io.github.townyadvanced.iconomy.settings.Settings;
@@ -17,10 +20,12 @@ import io.github.townyadvanced.iconomy.settings.Settings;
 public class BackEnd {
 	private static final String plugin_dir = iConomyUnlocked.getPlugin().getDataFolder().getPath();
 	private JdbcConnectionPool h2pool;
+	private HikariDataSource mysqlPool;
 	private String SQLTable = Settings.getDBTable();
 	private String dsn;
 	private String username;
 	private String password;
+	private final validDBTypes dbType;
 	private Logger log = iConomyUnlocked.getPlugin().getLogger();
 
 	private enum validDBTypes {
@@ -29,6 +34,7 @@ public class BackEnd {
 
 	public BackEnd() throws Exception {
 		validDBTypes type = validDBTypes.valueOf(Settings.getDBType());
+		this.dbType = type;
 		switch (type) {
 		case H2:
 			dsn = "jdbc:h2:./" + plugin_dir + File.separator + Settings.getDBName() + ";AUTO_RECONNECT=TRUE";
@@ -45,6 +51,20 @@ public class BackEnd {
 					+ Settings.getMysqlFlags();
 			this.username = Settings.getMysqlUser();
 			this.password = Settings.getMysqlPass();
+
+			HikariConfig hikariConfig = new HikariConfig();
+			hikariConfig.setJdbcUrl(this.dsn);
+			hikariConfig.setUsername(this.username);
+			hikariConfig.setPassword(this.password);
+			hikariConfig.setPoolName("iConomyUnlocked-MySQL");
+			hikariConfig.setMaximumPoolSize(Math.max(2, Settings.getMysqlPoolSize()));
+			hikariConfig.setMinimumIdle(Math.min(2, hikariConfig.getMaximumPoolSize()));
+			hikariConfig.setConnectionTimeout(8000L);
+			hikariConfig.setInitializationFailTimeout(-1L);
+			hikariConfig.addDataSourceProperty("cachePrepStmts", "true");
+			hikariConfig.addDataSourceProperty("prepStmtCacheSize", "250");
+			hikariConfig.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
+			this.mysqlPool = new HikariDataSource(hikariConfig);
 			break;
 		default:
 			throw new Exception("Unknown DB type set in config.yml: " + Settings.getDBType() + ", no DB connection was established!");
@@ -62,8 +82,7 @@ public class BackEnd {
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 
-		validDBTypes type = validDBTypes.valueOf(Settings.getDBType());
-		switch (type) {
+		switch (dbType) {
 		case H2:
 			try {
 				ps = conn.prepareStatement(
@@ -117,8 +136,7 @@ public class BackEnd {
 		Connection conn = getConnection();
 		PreparedStatement ps = null;
 		ResultSet rs = null;
-		validDBTypes type = validDBTypes.valueOf(Settings.getDBType());
-		switch (type) {
+		switch (dbType) {
 		case H2:
 			try {
 				ps = conn.prepareStatement(
@@ -177,23 +195,39 @@ public class BackEnd {
 
 	Connection getConnection() {
 		try {
-			validDBTypes type = validDBTypes.valueOf(Settings.getDBType());
-			switch (type) {
+			switch (dbType) {
 			case H2:
 				return this.h2pool.getConnection();
 			case MYSQL:
-				if (this.username.equalsIgnoreCase("") && this.password.equalsIgnoreCase(""))
-					return DriverManager.getConnection(this.dsn);
-				else
-					return DriverManager.getConnection(this.dsn, this.username, this.password);
+				return this.mysqlPool.getConnection();
 			default:
 				log.severe("Could not create connection!");
 			}
 
 		} catch (SQLException e) {
-			log.severe("Could not create connection: " + e);
+			log.log(Level.SEVERE, "Could not create a database connection: " + e.getMessage(), e);
 		}
 		return null;
+	}
+
+	/**
+	 * Shuts down whichever connection pool is currently in use. Safe to call
+	 * regardless of the configured database type.
+	 */
+	public void close() {
+		try {
+			if (this.h2pool != null)
+				this.h2pool.dispose();
+		} catch (Exception e) {
+			log.log(Level.WARNING, "Failed to dispose of the H2 connection pool cleanly.", e);
+		}
+
+		try {
+			if (this.mysqlPool != null)
+				this.mysqlPool.close();
+		} catch (Exception e) {
+			log.log(Level.WARNING, "Failed to close the MySQL connection pool cleanly.", e);
+		}
 	}
 
 	void close(Connection conn, PreparedStatement ps, ResultSet rs) {
