@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.jetbrains.annotations.Nullable;
@@ -40,6 +41,7 @@ public class Accounts {
             rs = ps.executeQuery();
             exists = rs.next();
         } catch (Exception ex) {
+            log.log(Level.WARNING, "Failed to check if an account exists for uuid " + uuid + ": " + ex.getMessage(), ex);
             exists = false;
         } finally {
         	iConomyUnlocked.getBackEnd().close(conn, ps, rs);
@@ -66,6 +68,7 @@ public class Accounts {
             rs = ps.executeQuery();
             exists = rs.next();
         } catch (Exception ex) {
+            log.log(Level.WARNING, "Failed to check if an account exists for name " + name + ": " + ex.getMessage(), ex);
             exists = false;
         } finally {
         	iConomyUnlocked.getBackEnd().close(conn, ps, rs);
@@ -91,6 +94,7 @@ public class Accounts {
             ps.setDouble(3, Settings.getDefaultBalance());
             ps.executeUpdate();
         } catch (Exception e) {
+            log.log(Level.WARNING, "Failed to create an account for " + name + " (" + uuid + "): " + e.getMessage(), e);
             return false;
         } finally {
         	iConomyUnlocked.getBackEnd().close(conn, ps);
@@ -131,6 +135,7 @@ public class Accounts {
             ps.setBoolean(4, hidden);
             ps.executeUpdate();
         } catch (Exception e) {
+            log.log(Level.WARNING, "Failed to import an account for " + name + " (" + uuid + "): " + e.getMessage(), e);
             return false;
         } finally {
         	iConomyUnlocked.getBackEnd().close(conn, ps);
@@ -150,10 +155,11 @@ public class Accounts {
         PreparedStatement ps = null;
         try {
             conn = iConomyUnlocked.getBackEnd().getConnection();
-            ps = conn.prepareStatement("DELETE FROM " + SQLTable + " WHERE uuid = ? LIMIT 1");
+            ps = conn.prepareStatement("DELETE FROM " + SQLTable + " WHERE uuid = ?");
             ps.setString(1, uuid.toString());
             ps.executeUpdate();
         } catch (Exception e) {
+            log.log(Level.WARNING, "Failed to remove account " + uuid + ": " + e.getMessage(), e);
             return false;
         } finally {
         	iConomyUnlocked.getBackEnd().close(conn, ps);
@@ -162,9 +168,9 @@ public class Accounts {
     }
 
     /**
-     * Remove ALL matching Accounts with this uuid..
+     * Remove the Account with this username.
      * 
-     * @param uuid the UUID of the account.
+     * @param name the username of the account.
      * @return true if successful.
      */
     public boolean removeCompletely(String name) {
@@ -172,10 +178,11 @@ public class Accounts {
         PreparedStatement ps = null;
         try {
             conn = iConomyUnlocked.getBackEnd().getConnection();
-            ps = conn.prepareStatement("DELETE FROM " + SQLTable + " WHERE uuid = ? LIMIT 1");
+            ps = conn.prepareStatement("DELETE FROM " + SQLTable + " WHERE username = ?");
             ps.setString(1, name);
             ps.executeUpdate();
         } catch (Exception e) {
+            log.log(Level.WARNING, "Failed to remove account " + name + ": " + e.getMessage(), e);
             return false;
         } finally {
         	iConomyUnlocked.getBackEnd().close(conn, ps);
@@ -197,6 +204,7 @@ public class Accounts {
             ps.setDouble(1, Settings.getDefaultBalance());
             ps.executeUpdate();
         } catch (Exception e) {
+            log.log(Level.WARNING, "Failed to purge default-balance accounts: " + e.getMessage(), e);
             return false;
         } finally {
         	iConomyUnlocked.getBackEnd().close(conn, ps);
@@ -218,6 +226,7 @@ public class Accounts {
             ps = conn.prepareStatement("TRUNCATE TABLE " + SQLTable);
             ps.executeUpdate();
         } catch (Exception e) {
+            log.log(Level.WARNING, "Failed to empty the accounts table: " + e.getMessage(), e);
             return false;
         } finally {
         	iConomyUnlocked.getBackEnd().close(conn, ps);
@@ -244,6 +253,7 @@ public class Accounts {
                 Values.add(Double.valueOf(rs.getDouble("balance")));
             
         } catch (Exception e) {
+            log.log(Level.WARNING, "Failed to fetch account balances: " + e.getMessage(), e);
             return null;
         } finally {
         	iConomyUnlocked.getBackEnd().close(conn, ps, rs);
@@ -360,6 +370,7 @@ public class Accounts {
         	if (exists)
         		id = rs.getInt("id");
         } catch (Exception ex) {
+            log.log(Level.WARNING, "Failed to look up account for name " + name + ": " + ex.getMessage(), ex);
             exists = false;
         } finally {
         	iConomyUnlocked.getBackEnd().close(conn, ps, rs);
@@ -388,13 +399,14 @@ public class Accounts {
         	if (exists)
         		id = rs.getInt("id");
         } catch (Exception ex) {
+            log.log(Level.WARNING, "Failed to look up account for uuid " + uuid + ": " + ex.getMessage(), ex);
             exists = false;
         } finally {
         	iConomyUnlocked.getBackEnd().close(conn, ps, rs);
         }
         if (exists) {
         	String name = getName(id);
-        	if (!name.isEmpty())
+        	if (name != null && !name.isEmpty())
         		return get(uuid, name);
         }
         return null;
@@ -414,6 +426,7 @@ public class Accounts {
 			if (rs.next())
 				uuid = UUID.fromString(rs.getString("uuid"));
 		} catch (Exception ex) {
+			log.log(Level.WARNING, "Failed to look up uuid for id " + id + ": " + ex.getMessage(), ex);
 			return null;
 		} finally {
 			iConomyUnlocked.getBackEnd().close(conn, ps, rs);
@@ -421,6 +434,7 @@ public class Accounts {
 		return uuid;
 	}
 
+	@Nullable
 	private String getName(int id) {
 
 		Connection conn = null;
@@ -435,6 +449,7 @@ public class Accounts {
 			if (rs.next())
 				name = rs.getString("username");
 		} catch (Exception ex) {
+			log.log(Level.WARNING, "Failed to look up name for id " + id + ": " + ex.getMessage(), ex);
 			return null;
 		} finally {
 			iConomyUnlocked.getBackEnd().close(conn, ps, rs);
