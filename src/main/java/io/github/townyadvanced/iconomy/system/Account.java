@@ -67,6 +67,7 @@ public class Account {
 			if (rs.next())
 				id = rs.getInt("id");
 		} catch (Exception ex) {
+			log.warning("Failed to look up id for " + this.name + ": " + ex.getMessage());
 			id = -1;
 		} finally {
 			iConomyUnlocked.getBackEnd().close(conn, ps, rs);
@@ -177,6 +178,7 @@ public class Account {
 				i++;
 			}
 		} catch (Exception ex) {
+			log.warning("Failed to determine rank for " + this.name + ": " + ex.getMessage());
 		} finally {
 			iConomyUnlocked.getBackEnd().close(conn, ps, rs);
 		}
