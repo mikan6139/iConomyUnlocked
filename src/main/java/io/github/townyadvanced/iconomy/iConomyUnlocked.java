@@ -140,10 +140,11 @@ public class iConomyUnlocked extends JavaPlugin {
 	@Override
 	public void onDisable() {
 		try {
-			backend.connectionPool().dispose();
+			if (backend != null)
+				backend.close();
 			getLogger().info("Plugin disabled.");
 		} catch (Exception e) {
-			getLogger().severe("Plugin disabled.");
+			getLogger().log(java.util.logging.Level.SEVERE, "Error while disabling iConomyUnlocked.", e);
 		} finally {
 			transactions = null;
 			accounts = null;
