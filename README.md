@@ -1,80 +1,87 @@
-## [iConomyUnlocked](https://github.com/LlmDl/iConomyUnlocked) - Developed by [LlmDl](https://github.com/LlmDl)
+﻿## iConomyUnlocked (mikan6139 fork)
 
-### Download
+このリポジトリは [SulkyWhale/iConomyUnlocked](https://github.com/SulkyWhale/iConomyUnlocked) のフォークです。
 
-#### Download iConomyUnlocked at [Modrinth](https://modrinth.com/plugin/iconomyunlocked)
-
-----
-### Overview
-
-iConomy's lineage dates back to the first years of Bukkit Plugins, created by Nijikokun. Having around 7 distinct versions, iConomy had its ups and downs over the years. At one point [iConomy 5](https://github.com/iconomy5legacy/iConomy) was taken over by ElgarL, and then ultimately LlmDl.
-
-Known for its simplicity and resiliance, iConomy 5 served many servers well for years but it was time to abandon it once [VaultUnlocked](https://github.com/TheNewEconomy/VaultUnlocked) arrived.
-
-VaultUnlocked finally adds proper UUID support to the VaultAPI. With that it is finally possible for plugins that use non-player accounts (like Towny,) to integrate with Economy plugins without using Vault's outdated named methods.
-
-iConomyUnlocked has been created to give iConomy 5-using servers an exit path. It support both the VaultAPI and VaultAPI 2, meaning it will work with any Vault plugins and any Vault2 plugins.
+### ダウンロード
+オリジナル版は [Modrinth](https://modrinth.com/plugin/iconomyunlocked) から入手できます。
+（このフォーク独自のビルドは配布していません。必要な場合はソースからビルドしてください。）
 
 ----
-### Facts
+### このフォークについて
 
-- Supports Vault-based and Vault2(VaultUnlocked)-based plugins that use economies.
-- Supports Folia.
-- Supports the H2 and MySQL database types.
-- Uses CommentedConfiguration for a config which automatically updates while maintaining your settings.
-- Can import accounts from iConomy 5.26.
+本家が止まってそうだったので自分用に直したやつです。
 
-----
-### Requirements:
-
-- [VaultUnlocked](https://github.com/TheNewEconomy/VaultUnlocked) or Vault.
+- `/shop`でTPS/MSPTが悪化する不具合を修正（MySQLの接続がプーリングされてなかったのでHikariCPで対応）
+- Bedrock(Geyser/Floodgate)プレイヤーが`/money top`に出てこない不具合を修正
+- ついでに見つけた細かいバグもいくつか直してます
 
 ----
-### Commands:
+### 概要
+iConomyの歴史はBukkitプラグイン黎明期、Nijikokun氏の手によるものまで遡ります。7種ほどの派生バージョンを経て、[iConomy 5](https://github.com/iconomy5legacy/iConomy) はElgarL氏、そして最終的にLlmDl氏が引き継ぎました。
 
-> <> Required, [] Optional
+シンプルさと安定性で長年多くのサーバーを支えてきたiConomy 5でしたが、[VaultUnlocked](https://github.com/TheNewEconomy/VaultUnlocked) の登場によって、ついにその役目を終える時が来ました。
 
-- /money: View your balance.
-  - ?: Help screen.
-  - [playername]: View someone else's balance.
-  - rank: View your rank in the richest players list.
-  - rank \<playername>: View someone else's rank in the richest players list.
-  - top [amount]: View the top richest players.
-  - pay \<player> \<amount>: Pay someone money.
-  - grant \<player> \<amount> \<silent>: Add money to someone's account.
-  - grant \<player> -\<amount> \<silent>: Remove money from someone's account.
-  - set \<player> \<amount>: Set someone's balance.
-  - hide \<player> \<true/false>: Hide or show an account on the top list.
-  - create \<player>: Creates an account with the default balance for a player.
-  - remove \<player>: Removes an account.
-  - reset \<player>: Resets an account to the default balance.
-  - purge: Removes all default-balance accounts.
-  - empty: Empties all accounts.
-  - stats: Checks stats about the economy.
-  - importiconomy: Imports accounts from iConomy 5.26.
+VaultUnlockedはVaultAPIにようやく正式なUUIDサポートをもたらしました。これにより、Towny のようにプレイヤー以外のアカウント（村・国など）を扱うプラグインも、Vaultの旧式な名前ベースのメソッドを使わずに経済プラグインと連携できるようになります。
+
+iConomyUnlockedは、iConomy 5を使い続けているサーバーに移行先を提供するために作られました。VaultAPIとVaultAPI 2（VaultUnlocked）の両方に対応しているため、Vault系・Vault2系どちらのプラグインとも連携できます。
 
 ----
-### Permissions:
+### 特徴
+- Vaultベース・Vault2(VaultUnlocked)ベース双方の経済連携プラグインに対応
+- Folia対応
+- H2・MySQL両方のデータベース形式に対応
+- CommentedConfigurationを使用し、設定を保持したままconfigを自動アップデート
+- iConomy 5.26からのアカウントインポートに対応
 
-  - iConomy.admin:
-    - default: false
-    - children:
-      - iConomy.admin.account.create: true
-      - iConomy.admin.account.remove: true
-      - iConomy.admin.reset: true
-      - iConomy.admin.bank.create: true
-      - iConomy.admin.empty: true
-      - iConomy.admin.purge: true
-      - iConomy.admin.stats: true
-      - iConomy.admin.grant: true
-      - iConomy.admin.hide: true
-      - iConomy.admin.set: true
-      - iConomy.admin.importiconomy: true
-  - iConomy.access:
-    - default: true
-  - iConomy.payment:
-    - default: true
-  - iConomy.rank:
-    - default: true
-  - iConomy.list:
-    - default: op
+----
+### 必要なもの
+- [VaultUnlocked](https://github.com/TheNewEconomy/VaultUnlocked) または Vault
+
+----
+### コマンド
+> <> は必須、[] は任意
+- `/money`: 自分の残高を確認
+  - `?`: ヘルプ画面を表示
+  - `[playername]`: 他プレイヤーの残高を確認
+  - `rank`: 資産ランキングでの自分の順位を確認
+  - `rank <playername>`: 他プレイヤーの順位を確認
+  - `top [amount]`: 資産ランキング上位を表示
+  - `pay <player> <amount>`: 指定プレイヤーに送金
+  - `grant <player> <amount> <silent>`: 指定プレイヤーの口座に加算
+  - `grant <player> -<amount> <silent>`: 指定プレイヤーの口座から減算
+  - `set <player> <amount>`: 指定プレイヤーの残高を設定
+  - `hide <player> <true/false>`: ランキング上での表示/非表示を切り替え
+  - `create <player>`: デフォルト残高でアカウントを作成
+  - `remove <player>`: アカウントを削除
+  - `reset <player>`: アカウントをデフォルト残高にリセット
+  - `purge`: デフォルト残高のままのアカウントを一括削除
+  - `empty`: 全アカウントを削除
+  - `stats`: 経済全体の統計を確認
+  - `importiconomy`: iConomy 5.26からアカウントをインポート
+
+----
+### 権限
+```yaml
+iConomy.admin:
+  default: false
+  children:
+    iConomy.admin.account.create: true
+    iConomy.admin.account.remove: true
+    iConomy.admin.reset: true
+    iConomy.admin.bank.create: true
+    iConomy.admin.empty: true
+    iConomy.admin.purge: true
+    iConomy.admin.stats: true
+    iConomy.admin.grant: true
+    iConomy.admin.hide: true
+    iConomy.admin.set: true
+    iConomy.admin.importiconomy: true
+iConomy.access:
+  default: true
+iConomy.payment:
+  default: true
+iConomy.rank:
+  default: true
+iConomy.list:
+  default: op
+```
