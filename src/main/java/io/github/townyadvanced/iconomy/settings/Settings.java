@@ -179,6 +179,10 @@ public class Settings {
 		return getString(ConfigNodes.DATABASE_MYSQL_FLAGS);
 	}
 
+	public static int getMysqlPoolSize() {
+		return getInt(ConfigNodes.DATABASE_MYSQL_POOL_SIZE);
+	}
+
 	public static boolean transactionLoggingEnabled() {
 		return getBoolean(ConfigNodes.TRANSACTION_LOGGING_ENABLED);
 	}
