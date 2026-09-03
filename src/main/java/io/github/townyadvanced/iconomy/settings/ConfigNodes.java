@@ -66,6 +66,10 @@ public enum ConfigNodes {
 			"?verifyServerCertificate=false&useSSL=false",
 			"",
 			"# The flags applied to the mysql database connection."),
+	DATABASE_MYSQL_POOL_SIZE("database.mysql.pool_size",
+			"10",
+			"",
+			"# The maximum number of pooled MySQL connections."),
 	
 	TRANSACTION_LOGGING_ROOT("transaction_logging","","",""),
 	TRANSACTION_LOGGING_ENABLED("transaction_logging.enabled",
