@@ -390,19 +390,25 @@ public class MoneyCommand implements TabExecutor {
 			return;
 
 		Collection<Double> accountHoldings = iConomyUnlocked.getAccounts().values();
-		Collection<Double> totalHoldings = accountHoldings;
+		if (accountHoldings == null) {
+			Messaging.sendErrorMessage(sender, "Could not fetch account stats, check the console for errors.");
+			return;
+		}
 
 		double TCOH = 0.0D;
-		int accounts = accountHoldings.size();
-		int totalAccounts = accounts;
+		int totalAccounts = accountHoldings.size();
 
-		for (Object o : totalHoldings.toArray())
-			TCOH += ((Double) o).doubleValue();
+		for (Double balance : accountHoldings)
+			TCOH += balance.doubleValue();
+
+		// Avoid a divide-by-zero (NaN/Infinity display) when the server has
+		// zero accounts, e.g. right after installing the plugin.
+		double average = totalAccounts == 0 ? 0.0D : TCOH / totalAccounts;
 
 		Messaging.send(sender, LangStrings.statsHeader());
 		Messaging.send(sender, LangStrings.statsTotal(Settings.getCurrencyName(), Settings.format(TCOH)));
-		Messaging.send(sender, LangStrings.statsAverage(Settings.getCurrencyName(), Settings.format(TCOH / totalAccounts)));
-		Messaging.send(sender, LangStrings.statsAccounts(String.valueOf(accounts)));
+		Messaging.send(sender, LangStrings.statsAverage(Settings.getCurrencyName(), Settings.format(average)));
+		Messaging.send(sender, LangStrings.statsAccounts(String.valueOf(totalAccounts)));
 	}
 
 	private void parseMoneyTopCommand(Player player, CommandSender sender, String[] args) {
