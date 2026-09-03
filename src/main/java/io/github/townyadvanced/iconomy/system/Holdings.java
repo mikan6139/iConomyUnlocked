@@ -1,5 +1,7 @@
 package io.github.townyadvanced.iconomy.system;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -79,6 +81,7 @@ public class Holdings {
 
     public synchronized void set(double balance) {
 
+		balance = round(balance);
 		this.balance = balance;
 		Bukkit.getPluginManager().callEvent(new AccountSetEvent(this, balance));
 
@@ -100,30 +103,38 @@ public class Holdings {
 
     public synchronized void add(double amount) {
         double balance = balance();
-        double ending = balance + amount;
+        double ending = round(balance + amount);
 
         callEventAndSetHoldings(amount, balance, ending);
     }
 
     public synchronized void subtract(double amount) {
         double balance = balance();
-        double ending = balance - amount;
+        double ending = round(balance - amount);
 
         callEventAndSetHoldings(amount, balance, ending);
     }
 
     public synchronized void divide(double amount) {
         double balance = balance();
-        double ending = balance / amount;
+        double ending = round(balance / amount);
 
         callEventAndSetHoldings(amount, balance, ending);
     }
 
     public synchronized void multiply(double amount) {
         double balance = balance();
-        double ending = balance * amount;
+        double ending = round(balance * amount);
 
         callEventAndSetHoldings(amount, balance, ending);
+    }
+
+    /**
+     * Rounds a monetary value to 2 decimal places, matching the precision
+     * used everywhere else (the balance column and Settings#format).
+     */
+    private static double round(double amount) {
+        return BigDecimal.valueOf(amount).setScale(2, RoundingMode.HALF_UP).doubleValue();
     }
 
 	/**
