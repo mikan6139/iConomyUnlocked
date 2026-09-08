@@ -183,6 +183,10 @@ public class Settings {
 		return getInt(ConfigNodes.DATABASE_MYSQL_POOL_SIZE);
 	}
 
+	public static int getVaultDisplayedDecimalPlaces() {
+		return getInt(ConfigNodes.CURRENCY_VAULT_DISPLAYED_DECIMAL_PLACES);
+	}
+
 	public static boolean transactionLoggingEnabled() {
 		return getBoolean(ConfigNodes.TRANSACTION_LOGGING_ENABLED);
 	}

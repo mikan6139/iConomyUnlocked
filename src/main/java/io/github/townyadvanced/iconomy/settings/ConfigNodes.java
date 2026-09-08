@@ -70,6 +70,11 @@ public enum ConfigNodes {
 			"10",
 			"",
 			"# The maximum number of pooled MySQL connections."),
+
+	CURRENCY_VAULT_DISPLAYED_DECIMAL_PLACES("currency_settings.vault_displayed_decimal_places",
+			"0",
+			"",
+			"# Default of zero, should display 0 decimal places. -1 or 2 can display decimal places."),
 	
 	TRANSACTION_LOGGING_ROOT("transaction_logging","","",""),
 	TRANSACTION_LOGGING_ENABLED("transaction_logging.enabled",
