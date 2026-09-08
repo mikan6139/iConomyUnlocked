@@ -13,7 +13,9 @@
 
 - `/shop`でTPS/MSPTが悪化する不具合を修正（MySQLの接続がプーリングされてなかったのでHikariCPで対応）
 - Bedrock(Geyser/Floodgate)プレイヤーが`/money top`に出てこない不具合を修正
-- ついでに見つけた細かいバグもいくつか直してます
+- ショップ等での取引で残高に細かい小数点の端数が出る不具合を修正
+- `currency_settings.vault_displayed_decimal_places`で小数点の表示桁数を設定できるように
+- ついでに見つけた細かいバグもいくつか直してます（`removeCompletely`のバグ、`/money stats`の0除算、MySQL利用時にプールが閉じられない不具合など）
 
 ----
 ### 概要
