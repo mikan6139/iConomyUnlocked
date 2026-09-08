@@ -130,7 +130,7 @@ public class VaultEconomy implements Economy {
     @Override
     public int fractionalDigits() {
 
-        return 2;
+        return Settings.getVaultDisplayedDecimalPlaces();
     }
 
     @Override

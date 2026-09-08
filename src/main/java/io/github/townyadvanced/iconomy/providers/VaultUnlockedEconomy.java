@@ -47,7 +47,7 @@ public class VaultUnlockedEconomy implements Economy {
 
 	@Override
 	public @NotNull int fractionalDigits(String pluginName) {
-		return 0;
+		return Settings.getVaultDisplayedDecimalPlaces();
 	}
 
 	@Override
