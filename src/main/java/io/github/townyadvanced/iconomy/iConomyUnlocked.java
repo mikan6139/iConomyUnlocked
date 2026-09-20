@@ -50,6 +50,7 @@ public class iConomyUnlocked extends JavaPlugin {
 			backend.setupAccountTable();
 
 			accounts = new Accounts();
+			accounts.logSuspiciousHiddenValuesOnStartup();
 
 			transactions = new Transactions();
 			backend.setupTransactionTable();
