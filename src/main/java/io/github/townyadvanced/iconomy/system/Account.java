@@ -168,7 +168,7 @@ public class Account {
 		PreparedStatement ps = null;
 		try {
 			conn = iConomyUnlocked.getBackEnd().getConnection();
-			ps = conn.prepareStatement("SELECT * FROM " + SQLTable + " WHERE hidden = 0 ORDER BY balance DESC");
+			ps = conn.prepareStatement("SELECT * FROM " + SQLTable + " WHERE (hidden = 0 OR hidden IS NULL) ORDER BY balance DESC");
 			rs = ps.executeQuery();
 
 			while (rs.next()) {
