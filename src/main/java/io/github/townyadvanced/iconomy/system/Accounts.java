@@ -293,6 +293,39 @@ public class Accounts {
         return Ranking;
     }
 
+    /**
+     * Scans the accounts table on startup for rows with a hidden value that
+     * isn't a clean 0/1 (e.g. NULL, or anything else). This most commonly
+     * happens when accounts are inserted by an external migration script
+     * that didn't set the column, and it silently excludes those accounts
+     * from /money top and /money rank without any error ever being logged.
+     * Surfacing it once at startup means an operator finds out immediately
+     * instead of relying on a player noticing weeks later.
+     */
+    public void logSuspiciousHiddenValuesOnStartup() {
+        Connection conn = null;
+        ResultSet rs = null;
+        PreparedStatement ps = null;
+        try {
+            conn = iConomyUnlocked.getBackEnd().getConnection();
+            ps = conn.prepareStatement("SELECT username FROM " + SQLTable + " WHERE hidden IS NULL OR (hidden <> 0 AND hidden <> 1)");
+            rs = ps.executeQuery();
+
+            List<String> affected = new ArrayList<String>();
+            while (rs.next())
+                affected.add(rs.getString("username"));
+
+            if (!affected.isEmpty()) {
+                log.warning(affected.size() + " accounts have an unexpected 'hidden' value (likely from an external"
+                        + " import) and may be missing from /money top and /money rank: " + String.join(", ", affected));
+            }
+        } catch (Exception e) {
+            log.warning("Failed to run the startup hidden-value sanity check: " + e.getMessage());
+        } finally {
+            iConomyUnlocked.getBackEnd().close(conn, ps, rs);
+        }
+    }
+
     public Map<UUID, String> getUUIDNameMap() {
         Connection conn = null;
         ResultSet rs = null;
