@@ -91,7 +91,7 @@ public class BackEnd {
 						+ "uuid VARCHAR(36) UNIQUE,"
 						+ "username VARCHAR(32),"
 						+ "balance DECIMAL (64, 2),"
-						+ "hidden BOOLEAN DEFAULT '0'"
+						+ "hidden BOOLEAN NOT NULL DEFAULT '0'"
 						+ ");"
 					);
 				ps.executeUpdate();

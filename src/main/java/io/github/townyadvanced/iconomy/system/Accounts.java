@@ -112,9 +112,13 @@ public class Accounts {
      * @return true if successful.
      */
     public boolean importAccount(String uuidraw, String name, double balance, boolean hidden) {
-		UUID uuid = UUID.fromString(uuidraw);
-		if (uuid == null)
+		UUID uuid;
+		try {
+			uuid = UUID.fromString(uuidraw);
+		} catch (IllegalArgumentException | NullPointerException e) {
+			log.warning("Could not import " + name + ", not a valid uuid: " + uuidraw);
 			return false;
+		}
 
 		if (exists(uuid)) {
 			Account account = Account.getAccount(uuid);
@@ -274,7 +278,7 @@ public class Accounts {
         LinkedHashMap<String, Double> Ranking = new LinkedHashMap<String, Double>();
         try {
             conn = iConomyUnlocked.getBackEnd().getConnection();
-            ps = conn.prepareStatement("SELECT username,balance FROM " + SQLTable + " WHERE hidden = 0 ORDER BY balance DESC LIMIT ?");
+            ps = conn.prepareStatement("SELECT username,balance FROM " + SQLTable + " WHERE (hidden = 0 OR hidden IS NULL) ORDER BY balance DESC LIMIT ?");
             ps.setInt(1, amount);
             rs = ps.executeQuery();
 
@@ -299,8 +303,14 @@ public class Accounts {
             ps = conn.prepareStatement("SELECT uuid,username FROM " + SQLTable);
             rs = ps.executeQuery();
 
-            while (rs.next())
-                map.put(UUID.fromString(rs.getString("uuid")), rs.getString("username"));
+            while (rs.next()) {
+                String rawUuid = rs.getString("uuid");
+                try {
+                    map.put(UUID.fromString(rawUuid), rs.getString("username"));
+                } catch (IllegalArgumentException | NullPointerException e) {
+                    log.warning("Skipping account with an invalid uuid: " + rawUuid);
+                }
+            }
         } catch (Exception e) {
             log.warning(e.getMessage());
             return null;
