@@ -10,6 +10,8 @@ import org.bukkit.plugin.ServicesManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import io.github.townyadvanced.iconomy.commands.MoneyCommand;
+import io.github.townyadvanced.iconomy.commands.AsyncReadCommands;
+import io.github.townyadvanced.iconomy.system.AccountReadQueries;
 import io.github.townyadvanced.iconomy.listener.PlayerJoinListener;
 import io.github.townyadvanced.iconomy.providers.VaultEconomy;
 import io.github.townyadvanced.iconomy.providers.VaultUnlockedEconomy;
@@ -26,6 +28,7 @@ public class iConomyUnlocked extends JavaPlugin {
 	private static BackEnd backend = null;
 	private static Accounts accounts = null;
 	private static Transactions transactions = null;
+	private static AsyncReadCommands readCommands;
 
 	public iConomyUnlocked() {
 		plugin = this;
@@ -55,6 +58,7 @@ public class iConomyUnlocked extends JavaPlugin {
 			transactions = new Transactions();
 			backend.setupTransactionTable();
 
+			readCommands = new AsyncReadCommands(this, new AccountReadQueries(backend, Settings.getDBTable()));
 			registerCommands();
 			registerListeners();
 		} catch (Exception e) {
@@ -141,12 +145,15 @@ public class iConomyUnlocked extends JavaPlugin {
 	@Override
 	public void onDisable() {
 		try {
+			if (readCommands != null)
+				readCommands.close();
 			if (backend != null)
 				backend.close();
 			getLogger().info("Plugin disabled.");
 		} catch (Exception e) {
 			getLogger().log(java.util.logging.Level.SEVERE, "Error while disabling iConomyUnlocked.", e);
 		} finally {
+			readCommands = null;
 			transactions = null;
 			accounts = null;
 			backend = null;
@@ -163,6 +170,10 @@ public class iConomyUnlocked extends JavaPlugin {
 
 	public static Accounts getAccounts() {
 		return accounts;
+	}
+
+	public static AsyncReadCommands getReadCommands() {
+		return readCommands;
 	}
 
 	public static Transactions getTransactions() {
