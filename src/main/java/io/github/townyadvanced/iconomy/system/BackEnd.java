@@ -53,13 +53,18 @@ public class BackEnd {
 			this.password = Settings.getMysqlPass();
 
 			HikariConfig hikariConfig = new HikariConfig();
-			hikariConfig.setJdbcUrl(this.dsn);
+			hikariConfig.setJdbcUrl(MySqlTimeouts.applyDefaults(this.dsn,
+				Settings.getMysqlConnectTimeout(), Settings.getMysqlSocketTimeout()));
 			hikariConfig.setUsername(this.username);
 			hikariConfig.setPassword(this.password);
 			hikariConfig.setPoolName("iConomyUnlocked-MySQL");
 			hikariConfig.setMaximumPoolSize(Math.max(2, Settings.getMysqlPoolSize()));
 			hikariConfig.setMinimumIdle(Math.min(2, hikariConfig.getMaximumPoolSize()));
-			hikariConfig.setConnectionTimeout(8000L);
+			hikariConfig.setIdleTimeout(600000L);
+			hikariConfig.setMaxLifetime(1740000L);
+			hikariConfig.setKeepaliveTime(300000L);
+			hikariConfig.setValidationTimeout(1000L);
+			hikariConfig.setConnectionTimeout(Settings.getMysqlPoolTimeout());
 			hikariConfig.setInitializationFailTimeout(-1L);
 			hikariConfig.addDataSourceProperty("cachePrepStmts", "true");
 			hikariConfig.addDataSourceProperty("prepStmtCacheSize", "250");
