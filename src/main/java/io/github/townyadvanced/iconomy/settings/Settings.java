@@ -112,7 +112,9 @@ public class Settings {
 	}
 
 	public static String format(BigDecimal money) {
-		return format(FORMAT.format(money.doubleValue()));
+		synchronized (FORMAT) {
+			return format(FORMAT.format(money.doubleValue()));
+		}
 	}
 
 	public static String format(double money) {
@@ -181,6 +183,18 @@ public class Settings {
 
 	public static int getMysqlPoolSize() {
 		return getInt(ConfigNodes.DATABASE_MYSQL_POOL_SIZE);
+	}
+
+	public static int getMysqlConnectTimeout() {
+		return Math.max(1, getInt(ConfigNodes.DATABASE_MYSQL_CONNECT_TIMEOUT));
+	}
+
+	public static int getMysqlSocketTimeout() {
+		return Math.max(1, getInt(ConfigNodes.DATABASE_MYSQL_SOCKET_TIMEOUT));
+	}
+
+	public static int getMysqlPoolTimeout() {
+		return Math.max(250, getInt(ConfigNodes.DATABASE_MYSQL_POOL_TIMEOUT));
 	}
 
 	public static int getVaultDisplayedDecimalPlaces() {
